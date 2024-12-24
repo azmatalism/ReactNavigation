@@ -1,20 +1,20 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import {StyleSheet, Text, View} from 'react-native';
+import React from 'react';
 
-function ForgotPassword () {
+function ForgotPassword() {
   return (
     <View style={styles.container}>
-      <Text>ForgotPassword</Text>
+      <Text style={{textAlign: 'center'}}>ForgotPassword</Text>
     </View>
-  )
+  );
 }
 
-export default ForgotPassword
+export default ForgotPassword;
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  });
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
