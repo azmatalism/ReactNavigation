@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,8 +11,56 @@ import {
 } from 'react-native';
 import {COLORS, IMGS, ROUTES} from '../../constants';
 import LinearGradient from 'react-native-linear-gradient';
+import {selectUserData, setUser} from '../../store/userSlice';
+import {serviceCall} from '../../config/services/GenericApi';
+import {useDispatch, useSelector} from 'react-redux';
 
 function Login({navigation}: any) {
+  const dispatch = useDispatch();
+  const userData = useSelector(selectUserData);
+  const [values, setValues]: any = useState({
+    email: 'azmi@gmail.com',
+    password: 'Aa@12345',
+  });
+
+  const loginHandler = async () => {
+    const data = {
+      email_or_mobile: values.email,
+      password: values.password,
+    };
+
+    try {
+      // setIsLoading(true);
+      const response = await serviceCall('POST', '/login', data, '');
+      const userData = await response;
+      if (userData?.data) {
+        console.log(
+          `Patient:==> ${userData?.data?.user?.first_name} : ID:==> ${userData?.data?.user?.id}`,
+        );
+        if (userData?.data?.user?.role?.toLowerCase() === 'patient') {
+          dispatch(setUser(userData?.data?.user));
+          console.log(userData?.data?.message);
+
+          setTimeout(() => {
+            // navigation.reset({
+            //   index: 0,
+            //   routes: [{name: 'mainDrawer'}],
+            // });
+            navigation.navigate(ROUTES.REGISTER);
+          }, 1000);
+        } else {
+          console.log('Invalid email/mobile number or password');
+        }
+      } else {
+        const errorMessage = JSON.parse(userData);
+        console.log('errorMessage:==>', errorMessage.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      // setIsLoading(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.main}>
       {/******************** STATUS BAR COLOR *********************/}
@@ -32,8 +80,22 @@ function Login({navigation}: any) {
             <Text style={styles.brandName}>Olors</Text>
           </View>
           <Text style={styles.loginContinueTxt}>Login in to continue</Text>
-          <TextInput style={styles.input} placeholder="Email" />
-          <TextInput style={styles.input} placeholder="Password" />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={values.email}
+            onChangeText={text =>
+              setValues(prevState => ({...prevState, email: text}))
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={values.password}
+            onChangeText={text =>
+              setValues(prevState => ({...prevState, password: text}))
+            }
+          />
 
           <View style={styles.loginBtnWrapper}>
             <LinearGradient
@@ -66,8 +128,7 @@ function Login({navigation}: any) {
           <Text style={styles.footerText}> Don't have an account? </Text>
 
           {/******************** REGISTER BUTTON *********************/}
-          <TouchableOpacity
-            onPress={() => navigation.navigate(ROUTES.REGISTER)}>
+          <TouchableOpacity onPress={loginHandler}>
             <Text style={styles.signupBtn}>Sign Up</Text>
           </TouchableOpacity>
         </View>
